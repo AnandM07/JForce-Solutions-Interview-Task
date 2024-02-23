@@ -1,0 +1,42 @@
+import { LightningElement, track, wire } from 'lwc';
+import createAppointmentDetails from '@salesforce/apex/AppointmentDetailsController.createAppointmentDetails';
+import checkAvailability from '@salesforce/apex/AppointmentDetailsController.checkAvailability';
+
+export default class AppointmentForm extends LightningElement {
+    @track error;
+    @track isAvailable = false;
+    selectedDateTime;
+
+    handleCheckAvailability() {
+        const inputDateTime = this.template.querySelector('lightning-input[type="datetime-local"]').value;
+        if (inputDateTime) {
+            this.selectedDateTime = new Date(inputDateTime);
+            checkAvailability({ selectedDateTime: this.selectedDateTime })
+                .then(result => {
+                    this.isAvailable = result === 'Available';
+                })
+                .catch(error => {
+                    this.error = error;
+                });
+        } else {
+            this.error = 'Please select appointment date and time.';
+        }
+    }
+
+    handleBookAppointment() {
+        const fields = this.template.querySelectorAll('lightning-input-field, lightning-textarea');
+        const appointmentDetails1 = {};
+        fields.forEach(field => {
+            appointmentDetails1[field.fieldName || field.name] = field.value;
+        });
+
+        createAppointmentDetails({ appointmentDetails: appointmentDetails1 })
+            .then(result => {
+                // Show success message
+                alert ('Appointment booked successfully.');
+            })
+            .catch(error => {
+                this.error = error;
+            });
+    }
+}
