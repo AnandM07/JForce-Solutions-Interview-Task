@@ -1,0 +1,43 @@
+public with sharing class AppointmentDetailsController {
+    @AuraEnabled(cacheable=true)
+    public static String checkAvailability(DateTime selectedDateTime) {
+        try {
+            // Fetch active appointment slots
+            List<Appointment_Slots_c> slots = [SELECT Id FROM Appointment_Slots_c 
+                                            WHERE Appointment_Date_c = :selectedDateTime.date() AND isActive_c = true];
+            if (slots.isEmpty()) {
+                return 'Not Available';
+            }
+            // Check if the selected date/time falls within any slot
+            for (Appointment_Slots__c slot : slots) {
+                if (selectedDateTime.time() >= slot.Start_Time_c && selectedDateTime.time() < slot.End_Time_c) {
+                    return 'Available';
+                }
+            }
+            return 'Not Available';
+        } catch (Exception e) {
+            throw new AuraHandledException('Error occurred while checking availability: ' + e.getMessage());
+        }
+    }
+
+    @AuraEnabled
+    public static Id createAppointmentDetails(Map<String, Object> appointmentDetails) {
+        try {
+            // Prepare appointment details for insertion
+            Appointment_Details_c newAppointment = new Appointment_Details_c();
+            newAppointment.Contact__c = (Id) appointmentDetails.get('ContactId');
+            newAppointment.Subject__c = (String) appointmentDetails.get('Subject');
+            newAppointment.Appointment_Date__c = (Date) appointmentDetails.get('AppointmentDateTime');
+            newAppointment.Description__c = (String) appointmentDetails.get('Description');
+
+            // Insert the new appointment record
+            insert newAppointment;
+
+            // If successful, return the ID of the new appointment record
+            return newAppointment.Id;
+        } catch (Exception e) {
+            // If an error occurs during insertion, throw an exception
+            throw new AuraHandledException('Error creating appointment details: ' + e.getMessage());
+        }
+    }
+}
