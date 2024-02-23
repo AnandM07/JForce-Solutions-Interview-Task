@@ -1,0 +1,35 @@
+<template>
+    <lightning-card title="Appointment Form">
+        <!-- Fields -->
+        <lightning-record-edit-form object-api-name="Appointment_Details__c" onsubmit={handleSubmit} onsuccess={handleSuccess} onerror={handleError}>
+            <div class="slds-grid slds-wrap">
+                <div class="slds-col slds-size_1-of-2">
+                    <!-- Contact Lookup -->
+                    <lightning-input-field field-name="Contact__c" required></lightning-input-field>
+                    <!-- Subject -->
+                    <lightning-input-field field-name="Subject__c" required></lightning-input-field>
+                    <!-- Appointment Date -->
+                    <lightning-input-field field-name="Appointment_Date__c" type="date" required onchange={handleDateChange}></lightning-input-field>
+                    <!-- Appointment Time -->
+                    <lightning-input-field field-name="Appointment_Time__c" type="time" required onchange={handleTimeChange}></lightning-input-field>
+                    <!-- Description -->
+                    <lightning-input-field field-name="Description__c" required></lightning-input-field>
+                </div>
+            </div>
+            <!-- Check Availability Button -->
+            <div class="slds-m-top_medium">
+                <lightning-button variant="brand" label="Check Availability" onclick={checkAvailability}></lightning-button>
+            </div>
+            <!-- Submit Button -->
+            <div class="slds-m-top_medium slds-text-align_center">
+                <lightning-button variant="brand" type="submit" label="Book Appointment"></lightning-button>
+            </div>
+        </lightning-record-edit-form>
+        <!-- Error Message -->
+        <template if:true={errorMessage}>
+            <div class="slds-theme_error">
+                <p class="slds-text-color_inverse slds-m-vertical_medium slds-p-horizontal_medium">{errorMessage}</p>
+            </div>
+        </template>
+    </lightning-card>
+</template>
